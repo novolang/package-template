@@ -1,0 +1,69 @@
+# The manifest of an Orbit package.  Every field a publish requires is
+# here, filled in with this template's own values; replace them.
+#
+# The reference is https://novo-lang.org/docs/publishing.html.
+
+[package]
+# The name `novo pkg add <name>` takes, and the repository's name.
+# Lowercase letters, digits, `-`, `_` and `.`.  A port of a package from
+# another language keeps the upstream name with `-nv`; an original takes
+# a plain name.
+name        = "package-template"
+
+# The release being published.  Below 1.0.0 a breaking change bumps the
+# MINOR number and a compatible one bumps the PATCH.
+version     = "0.1.0"
+
+# One or two sentences.  Say what the package is for, not what it is
+# called: this is the line a reader meets on novo-lang.org/packages and
+# in `novo pkg search`, and it is the whole of what most of them read.
+description = "The starting point for an Orbit package: a manifest with every field, one module, a test, a licence, and a CI job that installs the stable toolchain and publishes on a tag."
+
+# An SPDX identifier.  Apache-2.0 is what the first-party packages use.
+license     = "Apache-2.0"
+
+# draft | experimental | beta | stable — the lifecycle claim you are
+# making.  The registry keeps its operator's own copy of this, so what
+# `novo pkg info` reports is their classification and not yours.
+stability   = "draft"
+
+# ONE category, from https://novo-lang.org/docs/registry/categories.html
+# (`novo pkg categories` prints the same list).  It is the shelf a
+# reader browses to, not a word describing the implementation.
+category    = "tooling"
+
+# Free words a reader would search for, including the upstream project's
+# name for a port.  `keywords` is the older spelling of this same field
+# and is still read; do not write both.
+tags        = ["template", "scaffold", "starter"]
+
+# Where the source lives.  An http or https URL.
+repository  = "https://github.com/novolang/package-template"
+
+# Where bugs are tracked.  LEAVE IT OUT to be tracked on
+# novo-lang.org/bugs, which is what a first-party package does.  Name
+# your own tracker and the registry links there instead, and scores none
+# of its bug signals.
+# bugs      = "https://github.com/novolang/package-template/issues"
+
+# Who answers for the package.  Names, not email addresses: the registry
+# publishes this list on a public page.
+maintainers = ["novo-lang"]
+
+# The entry point.  A LIBRARY DECLARES ONE TOO — a dependency's `main`
+# is never built as an entry point, so it is the right place to say
+# "depend on this and `use` it".
+main        = "src/main.nv"
+
+# Titles for the pages `novo orbit docs --list` shows.  Pages are found
+# by convention — README.md plus docs/*.md — so this section is only for
+# the cases where a file's own first heading is not a good title.
+[docs.pages]
+"README.md" = "Using the Orbit package template"
+
+[dependencies]
+# some-nv = "^0.1"
+#
+# Write the WIDEST range you actually support.  One version of a package
+# is built into a program, so an exact pin in a library is the most
+# common reason two packages cannot be combined.

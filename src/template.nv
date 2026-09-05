@@ -1,0 +1,72 @@
+// src/template.nv — the package's one module.  Rename the file and the
+// `use` lines that name it; a module's name is its filename.
+//
+// WHAT A MODULE OWES ITS READER
+//
+// A header that says what the module is for and what it does not do,
+// then `pub` on exactly what you are promising.  Only `pub` items are
+// visible to another package, so the list is the API — a consumer
+// cannot reach anything else, and you can change everything else.
+//
+// Effects are part of that promise.  `parse` and `format` below carry
+// none, so a caller on the embedded tier can use them and a caller in a
+// pure function can call them; adding an `[io]` to either one later is
+// a breaking change even though the signature is unchanged.
+
+use std.list
+use std.str
+
+// A `key=value` line, split.
+//
+// A struct rather than a tuple because the two halves are not
+// interchangeable and a reader of `p.key` should not have to remember
+// which one came first.
+pub struct Pair
+    key: Str
+    value: Str
+
+// Parse one `key=value` line.
+//
+// `None` for a line with no `=`, and for one whose key is empty: both
+// are inputs this cannot answer, and an answer it invented would be
+// wrong somewhere downstream instead of here.  Surrounding whitespace
+// is trimmed from both halves; whitespace inside the value is kept,
+// because a value is somebody's text.
+//
+// The first `=` wins, so `a=b=c` is the key `a` and the value `b=c` —
+// the shape every configuration format with this syntax has agreed on.
+pub fn parse(line: Str) -> ?Pair
+    match str.index(line, "=")
+        None    => None
+        Some(i) =>
+            let key = str.trim(str.slice(line, 0, i))
+            let value = str.trim(str.slice(line, i + 1, str.len(line)))
+            if str.len(key) == 0
+                None
+            else
+                Some(Pair { key: key, value: value })
+
+// Write one pair back out, in the form `parse` reads.
+//
+// `format(parse(s))` is not `s` — the whitespace `parse` trimmed is
+// gone — but `parse(format(p))` is `p` for every pair this can make,
+// which is the direction a round-trip test can assert.
+pub fn format(p: Pair) -> Str
+    p.key + "=" + p.value
+
+// Parse a whole document, skipping blank lines and `#` comments.
+//
+// A line that does not parse is SKIPPED rather than failing the
+// document, because the callers of a configuration reader want the
+// settings they can have; a caller that needs the strict reading walks
+// the lines itself and calls `parse` on each.
+pub fn parse_all(text: Str) -> [Pair]
+    var out: [Pair] = []
+    for raw in str.split(text, "\n")
+        let line = str.trim(raw)
+        if str.len(line) > 0 and not str.starts_with(line, "#")
+            match parse(line)
+                None    => ()
+                Some(p) =>
+                    out = list.push(out, p)
+    out

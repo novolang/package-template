@@ -1,0 +1,85 @@
+// tests/template_tests.nv — the module's behaviour, including the
+// inputs it refuses.
+//
+// Run from the package directory:
+//   novo test tests/template_tests.nv
+//   novo test tests            # every @test module under tests/
+//
+// WHY THIS FILE IS NOT UNDER src/
+//
+// `src/` ships whole, and a consumer compiles every module under a
+// dependency's `src/` into their own program — so a suite left there is
+// built into every downstream binary, along with whatever it imports.
+// `tests/` is not on the publish allow-list, so it never ships, and
+// `novo test` still runs it as a member of the package with the
+// package's own modules and dependencies resolved exactly as a build
+// resolves them.  A test module sees the package's internals whether
+// they are `pub` or not, which is what keeps `pub` an honest list of
+// what you are promising.
+
+use std.list
+use std.test
+use template
+
+@test
+fn test_a_line_splits_at_its_first_equals() [io]
+    match template.parse("host=example.com")
+        None    => test.fail("a well-formed line did not parse")
+        Some(p) =>
+            test.assert_eq(p.key, "host")
+            test.assert_eq(p.value, "example.com")
+
+@test
+fn test_the_first_equals_wins() [io]
+    // `a=b=c` is the key `a` and the value `b=c`: the value is somebody
+    // else's text and may contain the separator.
+    match template.parse("query=a=b")
+        None    => test.fail("a value containing '=' did not parse")
+        Some(p) =>
+            test.assert_eq(p.key, "query")
+            test.assert_eq(p.value, "a=b")
+
+@test
+fn test_whitespace_around_each_half_is_trimmed() [io]
+    match template.parse("  host  =  example.com  ")
+        None    => test.fail("a padded line did not parse")
+        Some(p) =>
+            test.assert_eq(p.key, "host")
+            test.assert_eq(p.value, "example.com")
+
+@test
+fn test_a_line_without_an_equals_is_none() [io]
+    test.assert_none(template.parse("hostexample.com"))
+
+@test
+fn test_an_empty_key_is_none() [io]
+    // Not an empty pair: a setting with no name is not a setting, and
+    // returning one would push the error to whoever reads `p.key`.
+    test.assert_none(template.parse("=value"))
+    test.assert_none(template.parse("   =value"))
+
+@test
+fn test_an_empty_value_is_a_pair() [io]
+    // `key=` is a setting explicitly cleared, which is different from a
+    // setting nobody wrote.
+    match template.parse("key=")
+        None    => test.fail("an explicitly empty value did not parse")
+        Some(p) => test.assert_eq(p.value, "")
+
+@test
+fn test_formatting_a_pair_and_parsing_it_back_gives_the_pair() [io]
+    let p = Pair { key: "host", value: "example.com" }
+    match template.parse(template.format(p))
+        None    => test.fail("a formatted pair did not parse")
+        Some(q) =>
+            test.assert_eq(q.key, p.key)
+            test.assert_eq(q.value, p.value)
+
+@test
+fn test_a_document_skips_blanks_and_comments() [io]
+    let doc = "# a comment\n\nhost=example.com\n  \nport=8080\nnot a pair\n"
+    let ps = template.parse_all(doc)
+    test.assert_eq(list.len(ps), 2)
+    test.assert_eq(ps[0].key, "host")
+    test.assert_eq(ps[1].key, "port")
+    test.assert_eq(ps[1].value, "8080")
