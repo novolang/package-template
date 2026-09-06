@@ -99,9 +99,9 @@ request:
 1. installs the stable toolchain from
    `https://novo-lang.org/releases/install.sh`;
 2. `novo pkg build` — the package compiles;
-3. `novo test tests` — every `@test` module under `tests/`;
-4. `novo fmt --check` — the sources are formatted;
-5. the **shard audit**, `--strict`, fetched from
+3. `novo test <file>` once per module under `tests/`, in a loop that
+   stops on the first failure — `novo test` takes one file;
+4. the **shard audit**, `--strict`, fetched from
    `https://novo-lang.org/tools/`. It is the bar first-party packages
    are held to: formatting, documented public functions, tested public
    functions, no dead imports, pipelines where the standard library
@@ -151,9 +151,12 @@ every tier and inside a pure caller.
 ## Tests
 
 ```bash
-novo test tests            # every @test module under tests/
-novo test tests/template_tests.nv
+novo test tests/template_tests.nv     # one module
+for f in tests/*.nv; do novo test "$f" || break; done
 ```
+
+`novo test` takes one file, which is why the second line is a loop and
+why the workflow runs one.
 
 ## Licence
 

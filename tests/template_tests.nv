@@ -3,7 +3,6 @@
 //
 // Run from the package directory:
 //   novo test tests/template_tests.nv
-//   novo test tests            # every @test module under tests/
 //
 // WHY THIS FILE IS NOT UNDER src/
 //
