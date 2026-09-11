@@ -19,7 +19,9 @@ version     = "0.1.0"
 # in `novo pkg search`, and it is the whole of what most of them read.
 description = "The starting point for an Orbit package: a manifest with every field, one module, a test, a licence, and a CI job that installs the stable toolchain and publishes on a tag."
 
-# An SPDX identifier.  Apache-2.0 is what the first-party packages use.
+# An SPDX identifier.  Every first-party package is Apache-2.0 — the
+# patent grant is the reason, and https://novo-lang.org/docs/publishing.html
+# § The licence says why.  Your own package may say whatever you like.
 license     = "Apache-2.0"
 
 # draft | experimental | beta | stable — the lifecycle claim you are
@@ -31,6 +33,7 @@ stability   = "draft"
 # (`novo pkg categories` prints the same list).  It is the shelf a
 # reader browses to, not a word describing the implementation.
 category    = "tooling"
+layer       = "core"
 
 # Free words a reader would search for, including the upstream project's
 # name for a port.  `keywords` is the older spelling of this same field
@@ -50,10 +53,34 @@ repository  = "https://github.com/novolang/package-template"
 # publishes this list on a public page.
 maintainers = ["novo-lang"]
 
-# The entry point.  A LIBRARY DECLARES ONE TOO — a dependency's `main`
-# is never built as an entry point, so it is the right place to say
-# "depend on this and `use` it".
-main        = "src/main.nv"
+# The OLDEST released novo this package builds on.  A claim about the
+# LANGUAGE the sources need, which is why it sits here beside the licence
+# rather than under [tier].
+#
+# `novo pkg publish` checks it against the toolchain doing the
+# publishing — a floor newer than the compiler that just built these
+# bytes is a claim nobody has evidence for — and records it with the
+# release as its toolchain floor.  Leave it out and the publish records
+# the version that published the bytes instead, which is the one floor
+# anybody DOES have evidence for.
+novo        = ">= 0.8.3"
+
+# THERE IS NO `main` HERE, AND THAT IS THE POINT.  A package that names
+# no entry point is a LIBRARY: `novo pkg build` type-checks and
+# effect-checks every module and produces no binary, `novo test` runs
+# its tests, `novo pkg publish` archives it, and a consumer gets the
+# modules under `src/` and nothing else.  A dependency's entry file is
+# not read and its `main` is never built into anybody's program, so a
+# stub written to be named cost every consumer a parse and bought them
+# nothing.
+#
+# Make it a PROGRAM by writing the two halves together — the file and
+# the line that names it:
+#
+#   main = "src/main.nv"
+#
+# A manifest that names an entry it does not ship is an error, not a
+# library: the missing file is a typo, and the build says so.
 
 # Titles for the pages `novo orbit docs --list` shows.  Pages are found
 # by convention — README.md plus docs/*.md — so this section is only for

@@ -35,6 +35,18 @@ pub struct Pair
 //
 // The first `=` wins, so `a=b=c` is the key `a` and the value `b=c` —
 // the shape every configuration format with this syntax has agreed on.
+//
+// ```novo
+// match template.parse("host = example.com")
+//     Some(p) => println("${p.key} -> ${p.value}")   // host -> example.com
+//     None    => println("not a key=value line")
+// ```
+//
+// The block above is COMPILED — `novo doc` checks it, `novo test` runs
+// it, and `novo pkg publish` refuses to publish over one that no longer
+// works.  There is nothing to obey: it is a fenced ```novo block inside
+// the comment that documents the function, and the `use` line it needs
+// is supplied.
 pub fn parse(line: Str) -> ?Pair
     match str.index(line, "=")
         None    => None

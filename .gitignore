@@ -1,8 +1,16 @@
 # Build outputs.
 _novo/
 
+# The generated API page.  `novo doc` writes it here so you can read
+# what the registry will serve; the registry gets its own copy, uploaded
+# beside the archive by `novo pkg publish`.  It is generated from the
+# sources, so committing it would be committing a second original.
+APIDOC.md
+
 # The built package binary — `novo pkg build` names it after the
-# package.  Rename this line with the package.
+# package.  This template is a LIBRARY and builds none; the line is
+# here for when you add a `main` and it does.  Rename it with the
+# package.
 package-template
 
 # NOT novo.lock.  A locked build resolves the same closure twice and
